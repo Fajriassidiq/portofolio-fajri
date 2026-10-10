@@ -35,6 +35,9 @@
         }
     </script>
     <style>
+        html { scroll-padding-top: 5rem; background: #0f172a; }
+        body { overflow-x: hidden; }
+
         .glass-header {
             background: rgba(15, 23, 42, 0.85);
             backdrop-filter: blur(12px);
@@ -43,6 +46,7 @@
         .gradient-text {
             background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
         .gradient-border {
@@ -55,12 +59,210 @@
             transform: translateY(-6px);
             box-shadow: 0 12px 30px -10px rgba(56, 189, 248, 0.2);
         }
-        .profile-image {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid #38bdf8;
+
+        /* ============================================================
+           ANIMASI & EFEK
+           ============================================================ */
+        @keyframes fadeUp   { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+        @keyframes fadeDown { from { opacity: 0; transform: translateY(-100%); } to { opacity: 1; transform: none; } }
+        @keyframes floatY   { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes spin360  { to { transform: rotate(360deg); } }
+        @keyframes glowPulse { 0%, 100% { opacity: .25; } 50% { opacity: .5; } }
+        @keyframes gradientShift { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
+        @keyframes shine    { to { transform: translateX(100%); } }
+
+        /* Header */
+        header { animation: fadeDown .7s ease both; }
+        .glass-header { transition: box-shadow .3s ease, background .3s ease; }
+        .glass-header.scrolled {
+            background: rgba(15, 23, 42, 0.95);
+            box-shadow: 0 12px 30px -14px rgba(0, 0, 0, 0.7);
+        }
+
+        /* Muncul bertahap saat halaman dibuka */
+        .fade-up { opacity: 0; animation: fadeUp .8s cubic-bezier(.2, .7, .2, 1) forwards; }
+        .d1 { animation-delay: .10s; } .d2 { animation-delay: .25s; } .d3 { animation-delay: .40s; }
+        .d4 { animation-delay: .55s; } .d5 { animation-delay: .70s; }
+
+        /* Teks gradient bergerak halus */
+        .gradient-text {
+            background-image: linear-gradient(90deg, #38bdf8, #818cf8, #38bdf8);
+            background-size: 200% auto;
+            animation: gradientShift 5s ease-in-out infinite alternate;
+        }
+
+        /* Foto profil (PNG background transparan, tanpa lingkaran / kotak) */
+        .hero-photo { position: relative; animation: floatY 7s ease-in-out infinite; }
+        .hero-photo-glow {
+            position: absolute;
+            left: 50%;
+            bottom: 6%;
+            width: 85%;
+            height: 55%;
+            transform: translateX(-50%);
+            background: radial-gradient(ellipse at center, rgba(56, 189, 248, 0.38), transparent 70%);
+            filter: blur(32px);
+            animation: glowPulse 5s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .hero-photo img {
+            position: relative;
+            z-index: 1;
+            display: block;
+            width: 100%;
+            height: auto;
+            filter: drop-shadow(0 18px 28px rgba(14, 165, 233, 0.25));
+            -webkit-mask-image: linear-gradient(to bottom, #000 80%, transparent 100%);
+            mask-image: linear-gradient(to bottom, #000 80%, transparent 100%);
+        }
+
+        /* Tombol dengan kilau */
+        .btn-shine { position: relative; overflow: hidden; transition: transform .3s ease, box-shadow .3s ease, background .3s ease; }
+        .btn-shine:hover { transform: translateY(-3px); box-shadow: 0 14px 30px -10px rgba(14, 165, 233, 0.55); }
+        .btn-shine::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transform: translateX(-100%);
+        }
+        .btn-shine:hover::after { animation: shine .8s ease; }
+
+        /* Tombol sosial (WhatsApp & LinkedIn) */
+        .btn-wa:hover { box-shadow: 0 14px 30px -10px rgba(16, 185, 129, 0.6); }
+        .btn-li:hover { box-shadow: 0 14px 30px -10px rgba(37, 99, 235, 0.6); }
+
+        /* Muncul saat di-scroll */
+        .reveal {
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity .8s cubic-bezier(.2, .7, .2, 1), transform .8s cubic-bezier(.2, .7, .2, 1);
+        }
+        .reveal.is-visible { opacity: 1; transform: none; }
+
+        /* Hover skill & sertifikat */
+        #skills .g-skills > div, #certifications .g-cert > div {
+            transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
+        }
+        #skills .g-skills > div:hover, #certifications .g-cert > div:hover {
+            transform: translateY(-5px);
+            border-color: rgba(56, 189, 248, 0.45);
+            box-shadow: 0 14px 30px -12px rgba(56, 189, 248, 0.25);
+        }
+        #skills .tag { transition: transform .2s ease, border-color .2s ease, color .2s ease; }
+        #skills .tag:hover { transform: translateY(-2px); border-color: #38bdf8; color: #fff; }
+
+        /* Grafik bahasa */
+        .lang-track {
+            position: relative;
+            height: 12px;
+            border-radius: 9999px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            overflow: hidden;
+        }
+        .lang-bar {
+            height: 100%;
+            width: 0;
+            border-radius: 9999px;
+            position: relative;
+            transition: width 1.4s cubic-bezier(.2, .7, .2, 1);
+        }
+        .lang-bar.is-in { width: var(--w); }
+        .lang-bar::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);
+            transform: translateX(-100%);
+            animation: shine 2.8s ease-in-out infinite 1.6s;
+        }
+        .lang-ticks {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            pointer-events: none;
+        }
+        .lang-ticks i { flex: 1; border-right: 1px solid rgba(148, 163, 184, .25); }
+        .lang-ticks i:last-child { border-right: 0; }
+
+        /* Hormati pengaturan "kurangi gerakan" */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation: none !important; transition: none !important; }
+            .fade-up, .reveal { opacity: 1 !important; transform: none !important; }
+        }
+
+        /* ============================================================
+           PRINT / SAVE AS PDF
+           Tips: pilih ukuran kertas A4, Margins "Default" atau "None",
+           dan centang "Background graphics" jika tidak otomatis.
+           ============================================================ */
+        @media print {
+            @page { size: A4; margin: 10mm; }
+
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            html, body { background: #0f172a !important; }
+            body { font-size: 12px; }
+
+            /* Sembunyikan elemen interaktif */
+            header, .no-print { display: none !important; }
+
+            /* Hilangkan efek yang tidak perlu di kertas */
+            .card-hover, .card-hover:hover { transform: none !important; box-shadow: none !important; transition: none !important; }
+            .animate-pulse { animation: none !important; }
+
+            /* Matikan semua animasi agar hasil cetak statis & rapi */
+            *, *::before, *::after { animation: none !important; transition: none !important; }
+            .fade-up, .reveal { opacity: 1 !important; transform: none !important; }
+            .hero-photo { transform: none !important; width: 240px !important; max-width: 100% !important; }
+            .hero-photo img { filter: none !important; }
+            .hero-photo-glow { display: none !important; }
+            .btn-shine::after, .lang-bar::after { display: none !important; }
+            .gradient-text { background-size: 100% auto !important; }
+            .blur-3xl, .blur-lg { filter: none !important; }
+            .lang-bar { width: var(--w) !important; }
+
+            /* Spasi section lebih ringkas */
+            section {
+                padding-top: 22px !important;
+                padding-bottom: 22px !important;
+                background: transparent !important;
+                border: 0 !important;
+            }
+            .section-head { margin-bottom: 18px !important; }
+
+            /* Hero */
+            #hero { padding-top: 0 !important; }
+            #hero h1 { font-size: 2.4rem !important; margin-bottom: 14px !important; }
+            #hero .hero-grid {
+                grid-template-columns: 1.3fr 1fr !important;
+                gap: 20px !important;
+            }
+            #hero .hero-grid > div { grid-column: auto !important; text-align: left !important; }
+            #hero .hero-text .flex { justify-content: flex-start !important; }
+            #hero .hero-grid > div.hero-photo-col { text-align: center !important; }
+
+            /* Grid dipaksa layout desktop agar rapi di A4 */
+            .g-about { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 14px !important; }
+            .g-exp   { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 24px !important; }
+            .g-proj  { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 14px !important; }
+            .g-skills, .g-cert { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 12px !important; }
+            .g-skills > .lang-card { grid-column: span 2 / span 2 !important; }
+
+            /* Kartu tidak terpotong antar halaman */
+            [class*="rounded-2xl"], [class*="rounded-3xl"], .relative.pl-10 {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+            h2, h3, .section-head { break-after: avoid; page-break-after: avoid; }
+
+            /* Padding kartu lebih kecil */
+            .p-8 { padding: 18px !important; }
+            .md\:p-12 { padding: 22px !important; }
         }
     </style>
 </head>
@@ -69,15 +271,10 @@
     <!-- Header Navigation -->
     <header class="fixed top-0 left-0 right-0 z-50 glass-header border-b border-slate-800/80 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-20">
-                <!-- Logo -->
-                <a href="#hero" class="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-                    <span class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white text-lg font-black shadow-lg shadow-cyan-500/30">FA</span>
-                    <span class="hidden sm:inline">Fajri<span class="text-cyan-400">.</span></span>
-                </a>
+            <div class="flex items-center justify-end md:justify-center h-20">
 
                 <!-- Desktop Navigation -->
-                <nav class="hidden md:flex items-center space-x-8 text-sm font-medium">
+                <nav class="hidden md:flex items-center space-x-6 lg:space-x-8 text-sm font-medium">
                     <a href="#about" class="text-slate-300 hover:text-cyan-400 transition-colors">About</a>
                     <a href="#experience" class="text-slate-300 hover:text-cyan-400 transition-colors">Experience</a>
                     <a href="#projects" class="text-slate-300 hover:text-cyan-400 transition-colors">Projects & Research</a>
@@ -88,7 +285,7 @@
 
                 <!-- Mobile menu button -->
                 <div class="md:hidden">
-                    <button id="menu-btn" type="button" class="text-slate-300 hover:text-white p-2 rounded-lg focus:outline-none">
+                    <button id="menu-btn" type="button" aria-label="Toggle menu" class="text-slate-300 hover:text-white p-2 rounded-lg focus:outline-none">
                         <i class="fa-solid fa-bars text-xl"></i>
                     </button>
                 </div>
@@ -107,38 +304,34 @@
     </header>
 
     <!-- Hero Section -->
-    <section id="hero" class="relative pt-32 pb-20 md:pt-44 md:pb-32 overflow-hidden">
+    <section id="hero" class="relative pt-28 pb-16 sm:pt-32 md:pt-44 md:pb-32 overflow-hidden">
         <!-- Background Glow -->
-        <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
-        
+        <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] max-w-full bg-cyan-500/10 rounded-full blur-3xl pointer-events-none no-print"></div>
+
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            <div class="hero-grid grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
                 <!-- Text Intro -->
-                <div class="lg:col-span-7 text-center lg:text-left">
-                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-950/60 border border-cyan-500/30 text-cyan-400 text-xs sm:text-sm font-semibold mb-6">
-                        <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
-                        Bachelor's Degree of Informatics Engineering 
-                    </div>
-                    <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-tight mb-6">
+                <div class="hero-text lg:col-span-7 text-center lg:text-left">
+                    <h1 class="fade-up d2 text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-tight mb-6">
                         Hello, I'm <br class="hidden sm:inline">
                         <span class="gradient-text">Fajri Assidiq</span>
                     </h1>
-                    <p class="text-lg text-slate-400 mb-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
-                        Focused on <strong class="text-slate-200">Software Development</strong>, <strong class="text-slate-200">Artificial Intelligence</strong>, and <strong class="text-slate-200">Computer Vision</strong>. Experienced in medical image classification research using CNN & DWT, as well as interactive web development.
+                    <p class="fade-up d3 text-base sm:text-lg text-white mb-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+                        <strong class="text-white">Bachelor's Degree of Informatics Engineering</strong> from <strong class="text-white">Mercu Buana University</strong>. Focused on <strong class="text-white">Software Development</strong>, <strong class="text-white">Artificial Intelligence</strong>, and <strong class="text-white">Computer Vision</strong>. Experienced in medical image classification research using CNN & DWT, as well as interactive web development.
                     </p>
 
                     <!-- Contact & CTA Buttons -->
-                    <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 mb-10">
-                        <a href="#projects" class="px-7 py-3.5 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold hover:shadow-lg hover:shadow-cyan-500/30 transition-all flex items-center gap-2">
+                    <div class="no-print fade-up d4 flex flex-wrap items-center justify-center lg:justify-start gap-3 sm:gap-4 mb-10">
+                        <a href="#projects" class="btn-shine px-6 sm:px-7 py-3.5 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold shadow-lg shadow-cyan-500/25 flex items-center gap-2">
                             View Portfolio <i class="fa-solid fa-arrow-right text-sm"></i>
                         </a>
-                        <a href="mailto:fajriassidiq7@gmail.com" class="px-7 py-3.5 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold border border-slate-700 transition-all flex items-center gap-2">
+                        <a href="mailto:fajriassidiq7@gmail.com" class="btn-shine px-6 sm:px-7 py-3.5 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold border border-slate-700 flex items-center gap-2">
                             <i class="fa-solid fa-envelope text-cyan-400"></i> Send Email
                         </a>
                     </div>
 
                     <!-- Info Chips -->
-                    <div class="flex flex-wrap items-center justify-center lg:justify-start gap-6 text-sm text-slate-400 pt-4 border-t border-slate-800">
+                    <div class="fade-up d5 flex flex-wrap items-center justify-center lg:justify-start gap-x-6 gap-y-3 text-sm text-slate-400 pt-4 border-t border-slate-800">
                         <div class="flex items-center gap-2">
                             <i class="fa-solid fa-location-dot text-cyan-400"></i> Jakarta, Indonesia
                         </div>
@@ -152,47 +345,16 @@
                 </div>
 
                 <!-- Profile Card / Decorative Visual -->
-                <div class="lg:col-span-5 flex justify-center">
-                    <div class="relative w-full max-w-md">
-                        <div class="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-3xl transform rotate-3 blur-lg opacity-30"></div>
-                        <div class="relative bg-slate-800/90 border border-slate-700 p-8 rounded-3xl shadow-2xl backdrop-blur-sm">
-                            <div class="flex items-center justify-between mb-6">
-                                <!-- Profile Photo -->
-                                <div class="flex items-center gap-4">
-                                    <div class="w-20 h-20 rounded-full overflow-hidden border-2 border-cyan-400 shadow-lg shadow-cyan-500/20">
-                                        <img src="foto.jpeg" alt="Fajri Assidiq" class="w-full h-full object-cover">
-                                    </div>
-                                    <div>
-                                        <span class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                                            <i class="fa-solid fa-circle text-[8px] mr-1"></i> Open to Work
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <h3 class="text-xl font-bold text-white mb-2">Fajri Assidiq</h3>
-                            <p class="text-sm text-slate-400 mb-6">S.Kom (Candidate) - Mercu Buana University</p>
-                            
-                            <div class="space-y-3 text-sm">
-                                <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-700/50 flex items-center justify-between">
-                                    <span class="text-slate-400"><i class="fa-solid fa-brain mr-2 text-cyan-400"></i> Focus</span>
-                                    <span class="text-slate-200 font-medium">AI & Web Development</span>
-                                </div>
-                                <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-700/50 flex items-center justify-between">
-                                    <span class="text-slate-400"><i class="fa-solid fa-phone mr-2 text-cyan-400"></i> Phone</span>
-                                    <span class="text-slate-200 font-medium">+62 895-3291-99049</span>
-                                </div>
-                                <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-700/50 flex items-center justify-between">
-                                    <span class="text-slate-400"><i class="fa-brands fa-linkedin mr-2 text-cyan-400"></i> LinkedIn</span>
-                                    <a href="https://www.linkedin.com/in/fajri-assidiq/" target="_blank" class="text-cyan-400 hover:underline text-xs font-medium truncate max-w-[150px]">/in/fajri-assidiq</a>
-                                </div>
-                            </div>
+                <div class="hero-photo-col lg:col-span-5 flex flex-col items-center fade-up d3">
+                    <!-- Foto PNG transparan (tanpa lingkaran / kotak) -->
+                    <div class="hero-photo w-64 sm:w-80 lg:w-full max-w-sm">
+                        <div class="hero-photo-glow no-print"></div>
+                        <img src="foto.png" alt="Fajri Assidiq"
+                             onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden');">
+                        <span class="hidden text-center text-7xl font-black text-cyan-400 py-16">FA</span>
+                    </div>
 
-                            <div class="mt-6 pt-6 border-t border-slate-700/60 flex justify-between items-center text-xs text-slate-400">
-                                <span><i class="fa-solid fa-language text-cyan-400 mr-1"></i> Indonesian (Native)</span>
-                                <span><i class="fa-solid fa-globe text-cyan-400 mr-1"></i> English (TOEFL 583)</span>
-                            </div>
-                        </div>
+                    <div class="relative z-10 text-center -mt-3 sm:-mt-4">
                     </div>
                 </div>
             </div>
@@ -200,17 +362,17 @@
     </section>
 
     <!-- About Section -->
-    <section id="about" class="py-20 bg-slate-950/50 border-y border-slate-800">
+    <section id="about" class="py-16 sm:py-20 bg-slate-950/50 border-y border-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-3xl mx-auto mb-16">
+            <div class="section-head text-center max-w-3xl mx-auto mb-12 sm:mb-16">
                 <h2 class="text-xs font-bold uppercase tracking-wider text-cyan-400 mb-2">Professional Summary</h2>
                 <p class="text-3xl font-extrabold text-white sm:text-4xl">About Me</p>
                 <div class="w-16 h-1 bg-gradient-to-r from-cyan-500 to-blue-600 mx-auto mt-4 rounded-full"></div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="g-about grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
                 <!-- Detail Card 1 -->
-                <div class="bg-slate-800/50 p-8 rounded-2xl border border-slate-700/80 card-hover">
+                <div class="bg-slate-800/50 p-6 sm:p-8 rounded-2xl border border-slate-700/80 card-hover">
                     <div class="w-12 h-12 bg-cyan-500/10 text-cyan-400 rounded-xl flex items-center justify-center text-xl font-bold mb-6">
                         <i class="fa-solid fa-laptop-code"></i>
                     </div>
@@ -221,7 +383,7 @@
                 </div>
 
                 <!-- Detail Card 2 -->
-                <div class="bg-slate-800/50 p-8 rounded-2xl border border-slate-700/80 card-hover">
+                <div class="bg-slate-800/50 p-6 sm:p-8 rounded-2xl border border-slate-700/80 card-hover">
                     <div class="w-12 h-12 bg-indigo-500/10 text-indigo-400 rounded-xl flex items-center justify-center text-xl font-bold mb-6">
                         <i class="fa-solid fa-eye"></i>
                     </div>
@@ -232,7 +394,7 @@
                 </div>
 
                 <!-- Detail Card 3 -->
-                <div class="bg-slate-800/50 p-8 rounded-2xl border border-slate-700/80 card-hover">
+                <div class="bg-slate-800/50 p-6 sm:p-8 rounded-2xl border border-slate-700/80 card-hover">
                     <div class="w-12 h-12 bg-blue-500/10 text-blue-400 rounded-xl flex items-center justify-center text-xl font-bold mb-6">
                         <i class="fa-solid fa-lightbulb"></i>
                     </div>
@@ -246,10 +408,10 @@
     </section>
 
     <!-- Experience & Education Section -->
-    <section id="experience" class="py-20">
+    <section id="experience" class="py-16 sm:py-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
-                
+            <div class="g-exp grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
+
                 <!-- Work Experience -->
                 <div>
                     <div class="flex items-center gap-3 mb-8">
@@ -265,8 +427,8 @@
                             <div class="absolute left-0 top-1.5 w-7 h-7 bg-slate-900 border-2 border-cyan-400 rounded-full flex items-center justify-center text-xs text-cyan-400">
                                 <i class="fa-solid fa-circle text-[6px]"></i>
                             </div>
-                            <div class="bg-slate-800/60 p-6 rounded-2xl border border-slate-700/80">
-                                <span class="text-xs font-semibold text-cyan-400 bg-cyan-950/80 border border-cyan-800 px-3 py-1 rounded-full">Mar 2025 - Jun 2025</span>
+                            <div class="bg-slate-800/60 p-5 sm:p-6 rounded-2xl border border-slate-700/80">
+                                <span class="inline-block text-xs font-semibold text-cyan-400 bg-cyan-950/80 border border-cyan-800 px-3 py-1 rounded-full">Mar 2025 - Jun 2025</span>
                                 <h3 class="text-lg font-bold text-white mt-3">Web Developer Intern</h3>
                                 <p class="text-sm text-slate-300 mb-3">CV Prima Bella Panen Rejeki</p>
                                 <ul class="text-sm text-slate-400 space-y-2 list-disc list-inside">
@@ -283,8 +445,8 @@
                             <div class="absolute left-0 top-1.5 w-7 h-7 bg-slate-900 border-2 border-slate-600 rounded-full flex items-center justify-center text-xs text-slate-400">
                                 <i class="fa-solid fa-circle text-[6px]"></i>
                             </div>
-                            <div class="bg-slate-800/60 p-6 rounded-2xl border border-slate-700/80">
-                                <span class="text-xs font-semibold text-slate-400 bg-slate-900 border border-slate-700 px-3 py-1 rounded-full">Sep 2024 - Sep 2025</span>
+                            <div class="bg-slate-800/60 p-5 sm:p-6 rounded-2xl border border-slate-700/80">
+                                <span class="inline-block text-xs font-semibold text-slate-400 bg-slate-900 border border-slate-700 px-3 py-1 rounded-full">Sep 2024 - Sep 2025</span>
                                 <h3 class="text-lg font-bold text-white mt-3">Internal Communications Division</h3>
                                 <p class="text-sm text-slate-300 mb-3">Student Executive Board (BEM) Fasilkom Mercu Buana</p>
                                 <ul class="text-sm text-slate-400 space-y-2 list-disc list-inside">
@@ -312,7 +474,7 @@
                             <div class="absolute left-0 top-1.5 w-7 h-7 bg-slate-900 border-2 border-indigo-400 rounded-full flex items-center justify-center text-xs text-indigo-400">
                                 <i class="fa-solid fa-circle text-[6px]"></i>
                             </div>
-                            <div class="bg-slate-800/60 p-6 rounded-2xl border border-slate-700/80">
+                            <div class="bg-slate-800/60 p-5 sm:p-6 rounded-2xl border border-slate-700/80">
                                 <div class="flex items-center justify-between flex-wrap gap-2">
                                     <span class="text-xs font-semibold text-indigo-400 bg-indigo-950/80 border border-indigo-800 px-3 py-1 rounded-full">2022 - 2026 (In Progress)</span>
                                     <span class="text-xs text-emerald-400 font-bold bg-emerald-950/80 border border-emerald-800 px-2.5 py-1 rounded-md">GPA: 3.55 / 4.00</span>
@@ -328,8 +490,8 @@
                             <div class="absolute left-0 top-1.5 w-7 h-7 bg-slate-900 border-2 border-slate-600 rounded-full flex items-center justify-center text-xs text-slate-400">
                                 <i class="fa-solid fa-circle text-[6px]"></i>
                             </div>
-                            <div class="bg-slate-800/60 p-6 rounded-2xl border border-slate-700/80">
-                                <span class="text-xs font-semibold text-slate-400 bg-slate-900 border border-slate-700 px-3 py-1 rounded-full">2019 - 2022</span>
+                            <div class="bg-slate-800/60 p-5 sm:p-6 rounded-2xl border border-slate-700/80">
+                                <span class="inline-block text-xs font-semibold text-slate-400 bg-slate-900 border border-slate-700 px-3 py-1 rounded-full">2019 - 2022</span>
                                 <h3 class="text-lg font-bold text-white mt-3">Senior High School / Science</h3>
                                 <p class="text-sm text-slate-300">SMA IT Daarul Rahman 3</p>
                             </div>
@@ -342,19 +504,19 @@
     </section>
 
     <!-- Projects & Research Section -->
-    <section id="projects" class="py-20 bg-slate-950/50 border-t border-slate-800">
+    <section id="projects" class="py-16 sm:py-20 bg-slate-950/50 border-t border-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-3xl mx-auto mb-16">
+            <div class="section-head text-center max-w-3xl mx-auto mb-12 sm:mb-16">
                 <h2 class="text-xs font-bold uppercase tracking-wider text-cyan-400 mb-2">Featured Portfolio</h2>
                 <p class="text-3xl font-extrabold text-white sm:text-4xl">Projects & Research</p>
                 <div class="w-16 h-1 bg-gradient-to-r from-cyan-500 to-blue-600 mx-auto mt-4 rounded-full"></div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="g-proj grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                 <!-- Research Card -->
                 <div class="bg-slate-800/80 rounded-3xl border border-slate-700 overflow-hidden card-hover flex flex-col justify-between">
-                    <div class="p-8">
-                        <div class="flex items-center justify-between mb-4">
+                    <div class="p-6 sm:p-8">
+                        <div class="flex items-center justify-between flex-wrap gap-2 mb-4">
                             <span class="px-3 py-1 text-xs font-bold rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
                                 Research Project (Oct - Dec 2025)
                             </span>
@@ -366,9 +528,9 @@
                         <p class="text-slate-400 text-sm leading-relaxed mb-6">
                             Comparative analysis of automatic skin lesion classification system (7 classes, 8,000+ images). Utilizing wavelet-based preprocessing to extract spatial frequency features optimally.
                         </p>
-                        
+
                         <!-- Highlights -->
-                        <div class="grid grid-cols-2 gap-3 mb-6 text-xs">
+                        <div class="grid grid-cols-1 min-[420px]:grid-cols-2 gap-3 mb-6 text-xs">
                             <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-700/50">
                                 <div class="text-cyan-400 font-bold text-base">60.11% ➔ 72.10%</div>
                                 <div class="text-slate-400">Accuracy Improvement</div>
@@ -379,7 +541,7 @@
                             </div>
                         </div>
 
-                        <div class="flex flex-wrap gap-2 mb-6">
+                        <div class="flex flex-wrap gap-2">
                             <span class="px-2.5 py-1 text-xs bg-slate-900 text-slate-300 rounded-md">Python</span>
                             <span class="px-2.5 py-1 text-xs bg-slate-900 text-slate-300 rounded-md">CNN</span>
                             <span class="px-2.5 py-1 text-xs bg-slate-900 text-slate-300 rounded-md">DWT</span>
@@ -387,7 +549,7 @@
                             <span class="px-2.5 py-1 text-xs bg-slate-900 text-slate-300 rounded-md">Grad-CAM</span>
                         </div>
                     </div>
-                    <div class="px-8 py-4 bg-slate-900/50 border-t border-slate-700/60 text-xs text-slate-400 flex items-center justify-between">
+                    <div class="px-6 sm:px-8 py-4 bg-slate-900/50 border-t border-slate-700/60 text-xs text-slate-400 flex items-center justify-between flex-wrap gap-2">
                         <span><i class="fa-solid fa-university text-cyan-400 mr-1"></i> Mercu Buana University</span>
                         <span class="text-emerald-400 font-medium"><i class="fa-solid fa-check-circle mr-1"></i> Published</span>
                     </div>
@@ -395,8 +557,8 @@
 
                 <!-- Competition Card -->
                 <div class="bg-slate-800/80 rounded-3xl border border-slate-700 overflow-hidden card-hover flex flex-col justify-between">
-                    <div class="p-8">
-                        <div class="flex items-center justify-between mb-4">
+                    <div class="p-6 sm:p-8">
+                        <div class="flex items-center justify-between flex-wrap gap-2 mb-4">
                             <span class="px-3 py-1 text-xs font-bold rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
                                 Competition Project (July 2025)
                             </span>
@@ -408,9 +570,9 @@
                         <p class="text-slate-400 text-sm leading-relaxed mb-6">
                             Developed an intelligent e-commerce platform with AI-based fashion recommendations as a finalist team in a national competition.
                         </p>
-                        
+
                         <!-- Highlights -->
-                        <div class="grid grid-cols-2 gap-3 mb-6 text-xs">
+                        <div class="grid grid-cols-1 min-[420px]:grid-cols-2 gap-3 mb-6 text-xs">
                             <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-700/50">
                                 <div class="text-amber-400 font-bold text-base">Bronze Medal</div>
                                 <div class="text-slate-400">Smart Web Innovation</div>
@@ -421,14 +583,14 @@
                             </div>
                         </div>
 
-                        <div class="flex flex-wrap gap-2 mb-6">
+                        <div class="flex flex-wrap gap-2">
                             <span class="px-2.5 py-1 text-xs bg-slate-900 text-slate-300 rounded-md">AI Web Solution</span>
                             <span class="px-2.5 py-1 text-xs bg-slate-900 text-slate-300 rounded-md">Smart Fashion</span>
                             <span class="px-2.5 py-1 text-xs bg-slate-900 text-slate-300 rounded-md">UI/UX Branding</span>
                             <span class="px-2.5 py-1 text-xs bg-slate-900 text-slate-300 rounded-md">Graphic Design</span>
                         </div>
                     </div>
-                    <div class="px-8 py-4 bg-slate-900/50 border-t border-slate-700/60 text-xs text-slate-400 flex items-center justify-between">
+                    <div class="px-6 sm:px-8 py-4 bg-slate-900/50 border-t border-slate-700/60 text-xs text-slate-400 flex items-center justify-between flex-wrap gap-2">
                         <span><i class="fa-solid fa-award text-amber-400 mr-1"></i> National Level Competition</span>
                         <span class="text-amber-400 font-medium">Finalist Team</span>
                     </div>
@@ -438,16 +600,16 @@
     </section>
 
     <!-- Skills Section -->
-    <section id="skills" class="py-20">
+    <section id="skills" class="py-16 sm:py-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-3xl mx-auto mb-16">
+            <div class="section-head text-center max-w-3xl mx-auto mb-12 sm:mb-16">
                 <h2 class="text-xs font-bold uppercase tracking-wider text-cyan-400 mb-2">Technical Competencies</h2>
                 <p class="text-3xl font-extrabold text-white sm:text-4xl">Skills & Technologies</p>
                 <div class="w-16 h-1 bg-gradient-to-r from-cyan-500 to-blue-600 mx-auto mt-4 rounded-full"></div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                
+            <div class="g-skills grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+
                 <!-- Programming Languages -->
                 <div class="bg-slate-800/50 p-6 rounded-2xl border border-slate-700/80">
                     <div class="flex items-center gap-3 mb-4">
@@ -455,13 +617,13 @@
                         <h3 class="font-bold text-white text-lg">Programming Languages</h3>
                     </div>
                     <div class="flex flex-wrap gap-2">
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Python</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">JavaScript</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">PHP</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">C++</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Java</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Dart</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">SQL</span>
+                        <span class="tag px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Python</span>
+                        <span class="tag px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">JavaScript</span>
+                        <span class="tag px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">PHP</span>
+                        <span class="tag px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">C++</span>
+                        <span class="tag px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Java</span>
+                        <span class="tag px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Dart</span>
+                        <span class="tag px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">SQL</span>
                     </div>
                 </div>
 
@@ -472,12 +634,12 @@
                         <h3 class="font-bold text-white text-lg">Framework & Library</h3>
                     </div>
                     <div class="flex flex-wrap gap-2">
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">React.js</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Vue.js</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Laravel (MVC)</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Node.js</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Spring Boot</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Flutter</span>
+                        <span class="tag px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">React.js</span>
+                        <span class="tag px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Vue.js</span>
+                        <span class="tag px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Laravel (MVC)</span>
+                        <span class="tag px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Node.js</span>
+                        <span class="tag px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Spring Boot</span>
+                        <span class="tag px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Flutter</span>
                     </div>
                 </div>
 
@@ -488,10 +650,10 @@
                         <h3 class="font-bold text-white text-lg">AI & Computer Vision</h3>
                     </div>
                     <div class="flex flex-wrap gap-2">
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Computer Vision</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Image Processing (DWT, SVD)</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">CNN Model Training</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Grad-CAM</span>
+                        <span class="tag px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Computer Vision</span>
+                        <span class="tag px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Image Processing (DWT, SVD)</span>
+                        <span class="tag px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">CNN Model Training</span>
+                        <span class="tag px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Grad-CAM</span>
                     </div>
                 </div>
 
@@ -502,10 +664,10 @@
                         <h3 class="font-bold text-white text-lg">Database & Cloud</h3>
                     </div>
                     <div class="flex flex-wrap gap-2">
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">MySQL / Relational SQL</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">MongoDB</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">RESTful API Dev</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Cloud Computing</span>
+                        <span class="tag px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">MySQL / Relational SQL</span>
+                        <span class="tag px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">MongoDB</span>
+                        <span class="tag px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">RESTful API Dev</span>
+                        <span class="tag px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Cloud Computing</span>
                     </div>
                 </div>
 
@@ -516,9 +678,9 @@
                         <h3 class="font-bold text-white text-lg">CMS & Visual Design</h3>
                     </div>
                     <div class="flex flex-wrap gap-2">
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Graphic Designer</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Content Management System (CMS)</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">WordPress</span>
+                        <span class="tag px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Graphic Designer</span>
+                        <span class="tag px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Content Management System (CMS)</span>
+                        <span class="tag px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">WordPress</span>
                     </div>
                 </div>
 
@@ -529,11 +691,81 @@
                         <h3 class="font-bold text-white text-lg">Soft Skills</h3>
                     </div>
                     <div class="flex flex-wrap gap-2">
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Analytical Thinking</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Problem Solving</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Effective Communication</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Teamwork</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Attention to Detail</span>
+                        <span class="tag px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Analytical Thinking</span>
+                        <span class="tag px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Problem Solving</span>
+                        <span class="tag px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Effective Communication</span>
+                        <span class="tag px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Teamwork</span>
+                        <span class="tag px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-medium border border-slate-700">Attention to Detail</span>
+                    </div>
+                </div>
+
+                <!-- Language Skills (Grafik) -->
+                <div class="lang-card bg-slate-800/50 p-6 sm:p-8 rounded-2xl border border-slate-700/80 md:col-span-2 lg:col-span-3">
+                    <div class="flex items-center gap-3 mb-8">
+                        <i class="fa-solid fa-language text-sky-400 text-xl"></i>
+                        <h3 class="font-bold text-white text-lg">Language Skills</h3>
+                    </div>
+
+                    <div id="lang-chart" class="space-y-7">
+                        <!-- Indonesian -->
+                        <div>
+                            <div class="flex items-center justify-between gap-3 mb-2.5">
+                                <div class="flex items-center gap-2.5 text-sm font-semibold text-white">
+                                    <i class="fa-solid fa-circle text-[8px] text-cyan-400"></i> Indonesian
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span class="text-xs font-semibold text-cyan-400 bg-cyan-950/80 border border-cyan-800 px-2.5 py-1 rounded-full">Professional</span>
+                                    <span class="text-xs text-slate-400 font-medium w-9 text-right">100%</span>
+                                </div>
+                            </div>
+                            <div class="lang-track">
+                                <div class="lang-bar bg-gradient-to-r from-cyan-500 to-blue-500" style="--w:100%"></div>
+                                <div class="lang-ticks"><i></i><i></i><i></i><i></i></div>
+                            </div>
+                        </div>
+
+                        <!-- English -->
+                        <div>
+                            <div class="flex items-center justify-between gap-3 mb-2.5">
+                                <div class="flex items-center gap-2.5 text-sm font-semibold text-white">
+                                    <i class="fa-solid fa-circle text-[8px] text-indigo-400"></i> English
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span class="text-xs font-semibold text-indigo-400 bg-indigo-950/80 border border-indigo-800 px-2.5 py-1 rounded-full">Intermediate</span>
+                                    <span class="text-xs text-slate-400 font-medium w-9 text-right">85%</span>
+                                </div>
+                            </div>
+                            <div class="lang-track">
+                                <div class="lang-bar bg-gradient-to-r from-indigo-500 to-purple-500" style="--w:85%"></div>
+                                <div class="lang-ticks"><i></i><i></i><i></i><i></i></div>
+                            </div>
+                        </div>
+
+                        <!-- Arabic -->
+                        <div>
+                            <div class="flex items-center justify-between gap-3 mb-2.5">
+                                <div class="flex items-center gap-2.5 text-sm font-semibold text-white">
+                                    <i class="fa-solid fa-circle text-[8px] text-amber-400"></i> Arabic
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span class="text-xs font-semibold text-amber-400 bg-amber-950/80 border border-amber-800 px-2.5 py-1 rounded-full">Basic</span>
+                                    <span class="text-xs text-slate-400 font-medium w-9 text-right">60%</span>
+                                </div>
+                            </div>
+                            <div class="lang-track">
+                                <div class="lang-bar bg-gradient-to-r from-amber-500 to-orange-500" style="--w:60%"></div>
+                                <div class="lang-ticks"><i></i><i></i><i></i><i></i></div>
+                            </div>
+                        </div>
+
+                        <!-- Skala -->
+                        <div class="flex justify-between text-[10px] sm:text-xs uppercase tracking-wider font-semibold text-slate-500 pt-1">
+                            <span>0%</span>
+                            <span>25%</span>
+                            <span>50%</span>
+                            <span>75%</span>
+                            <span>100%</span>
+                        </div>
                     </div>
                 </div>
 
@@ -542,25 +774,25 @@
     </section>
 
     <!-- Certifications Section -->
-    <section id="certifications" class="py-20 bg-slate-950/50 border-t border-slate-800">
+    <section id="certifications" class="py-16 sm:py-20 bg-slate-950/50 border-t border-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-3xl mx-auto mb-16">
+            <div class="section-head text-center max-w-3xl mx-auto mb-12 sm:mb-16">
                 <h2 class="text-xs font-bold uppercase tracking-wider text-cyan-400 mb-2">Licenses & Certificates</h2>
                 <p class="text-3xl font-extrabold text-white sm:text-4xl">Professional Certifications</p>
                 <div class="w-16 h-1 bg-gradient-to-r from-cyan-500 to-blue-600 mx-auto mt-4 rounded-full"></div>
             </div>
 
             <!-- Certification Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                
+            <div class="g-cert grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+
                 <!-- BNSP -->
                 <div class="p-6 rounded-2xl bg-slate-800/80 border border-cyan-500/30 relative overflow-hidden group">
                     <div class="absolute top-0 right-0 w-20 h-20 bg-cyan-500/10 rounded-bl-full pointer-events-none"></div>
                     <div class="flex items-start gap-4">
-                        <div class="p-3 rounded-xl bg-cyan-500/20 text-cyan-400 font-bold text-xl">
+                        <div class="p-3 rounded-xl bg-cyan-500/20 text-cyan-400 font-bold text-xl shrink-0">
                             <i class="fa-solid fa-award"></i>
                         </div>
-                        <div>
+                        <div class="min-w-0">
                             <span class="text-[10px] uppercase tracking-wider font-bold text-cyan-400">BNSP Official</span>
                             <h4 class="text-base font-bold text-white mt-1">Software Engineer Competency Certification</h4>
                             <p class="text-xs text-slate-400 mt-2">Software Engineering Competency Certification</p>
@@ -571,10 +803,10 @@
                 <!-- TOEFL -->
                 <div class="p-6 rounded-2xl bg-slate-800/80 border border-slate-700 relative overflow-hidden">
                     <div class="flex items-start gap-4">
-                        <div class="p-3 rounded-xl bg-emerald-500/20 text-emerald-400 font-bold text-xl">
+                        <div class="p-3 rounded-xl bg-emerald-500/20 text-emerald-400 font-bold text-xl shrink-0">
                             <i class="fa-solid fa-language"></i>
                         </div>
-                        <div>
+                        <div class="min-w-0">
                             <span class="text-[10px] uppercase tracking-wider font-bold text-emerald-400">Elskill English Course</span>
                             <h4 class="text-base font-bold text-white mt-1">TOEFL Test: Score 583</h4>
                             <p class="text-xs text-slate-400 mt-2">Intermediate/Advance English Proficiency</p>
@@ -585,10 +817,10 @@
                 <!-- IBM Chatbot -->
                 <div class="p-6 rounded-2xl bg-slate-800/80 border border-slate-700 relative overflow-hidden">
                     <div class="flex items-start gap-4">
-                        <div class="p-3 rounded-xl bg-blue-500/20 text-blue-400 font-bold text-xl">
+                        <div class="p-3 rounded-xl bg-blue-500/20 text-blue-400 font-bold text-xl shrink-0">
                             <i class="fa-solid fa-robot"></i>
                         </div>
-                        <div>
+                        <div class="min-w-0">
                             <span class="text-[10px] uppercase tracking-wider font-bold text-blue-400">Cognitive Class</span>
                             <h4 class="text-base font-bold text-white mt-1">Build Your Own Chatbot</h4>
                             <p class="text-xs text-slate-400 mt-2">Virtual assistant & conversational AI development</p>
@@ -599,10 +831,10 @@
                 <!-- Coursera Azure -->
                 <div class="p-6 rounded-2xl bg-slate-800/80 border border-slate-700">
                     <div class="flex items-start gap-4">
-                        <div class="p-3 rounded-xl bg-sky-500/20 text-sky-400 font-bold text-xl">
+                        <div class="p-3 rounded-xl bg-sky-500/20 text-sky-400 font-bold text-xl shrink-0">
                             <i class="fa-brands fa-microsoft"></i>
                         </div>
-                        <div>
+                        <div class="min-w-0">
                             <span class="text-[10px] uppercase tracking-wider font-bold text-sky-400">Coursera</span>
                             <h4 class="text-base font-bold text-white mt-1">Build Computer Vision App with Azure</h4>
                             <p class="text-xs text-slate-400 mt-2">Azure Cognitive Services Implementation</p>
@@ -613,10 +845,10 @@
                 <!-- IBM Fundamentals (Group) -->
                 <div class="p-6 rounded-2xl bg-slate-800/80 border border-slate-700">
                     <div class="flex items-start gap-4">
-                        <div class="p-3 rounded-xl bg-indigo-500/20 text-indigo-400 font-bold text-xl">
+                        <div class="p-3 rounded-xl bg-indigo-500/20 text-indigo-400 font-bold text-xl shrink-0">
                             <i class="fa-solid fa-graduation-cap"></i>
                         </div>
-                        <div>
+                        <div class="min-w-0">
                             <span class="text-[10px] uppercase tracking-wider font-bold text-indigo-400">IBM Academy</span>
                             <h4 class="text-base font-bold text-white mt-1">Data, AI & Web Fundamentals</h4>
                             <p class="text-xs text-slate-400 mt-2">Data Fundamentals, AI Fundamentals, Web Dev Fundamentals</p>
@@ -627,10 +859,10 @@
                 <!-- Cisco NetAcad (Group) -->
                 <div class="p-6 rounded-2xl bg-slate-800/80 border border-slate-700">
                     <div class="flex items-start gap-4">
-                        <div class="p-3 rounded-xl bg-teal-500/20 text-teal-400 font-bold text-xl">
+                        <div class="p-3 rounded-xl bg-teal-500/20 text-teal-400 font-bold text-xl shrink-0">
                             <i class="fa-solid fa-network-wired"></i>
                         </div>
-                        <div>
+                        <div class="min-w-0">
                             <span class="text-[10px] uppercase tracking-wider font-bold text-teal-400">Cisco Networking Academy</span>
                             <h4 class="text-base font-bold text-white mt-1">Python, JS, IoT & Data Science</h4>
                             <p class="text-xs text-slate-400 mt-2">Python Essentials 1, JS Essentials 1&2, Digital Transformation</p>
@@ -643,61 +875,39 @@
     </section>
 
     <!-- Contact & Footer Section -->
-    <section id="contact" class="py-20 relative overflow-hidden">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-gradient-to-r from-slate-800 to-slate-900 p-8 md:p-12 rounded-3xl border border-slate-700 shadow-2xl relative">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+    <section id="contact" class="py-16 sm:py-20 relative overflow-hidden">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-gradient-to-r from-slate-800 to-slate-900 p-6 sm:p-10 md:p-12 rounded-3xl border border-slate-700 shadow-2xl relative">
+                <div class="g-contact space-y-8 text-center">
+
+                    <!-- Heading -->
                     <div>
                         <span class="text-xs font-bold uppercase tracking-wider text-cyan-400">Contact Me</span>
-                        <h2 class="text-3xl font-extrabold text-white mt-2 mb-4">Interested in Collaborating?</h2>
-                        <p class="text-slate-300 text-sm leading-relaxed mb-6">
+                        <h2 class="text-3xl sm:text-4xl font-extrabold text-white mt-2 mb-4">Interested in Collaborating?</h2>
+                        <p class="text-slate-300 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto">
                             I'm always open to discussions about career opportunities, freelance projects, or research collaborations in Software Engineering & Artificial Intelligence.
                         </p>
+                    </div>
 
-                        <div class="space-y-4 text-sm">
-                            <a href="mailto:fajriassidiq7@gmail.com" class="flex items-center gap-4 text-slate-300 hover:text-cyan-400 transition-colors p-3 rounded-xl bg-slate-900/60 border border-slate-700/50">
-                                <div class="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400"><i class="fa-solid fa-envelope"></i></div>
-                                <div>
-                                    <div class="text-xs text-slate-400">Email Direct</div>
-                                    <div class="font-medium">fajriassidiq7@gmail.com</div>
-                                </div>
-                            </a>
-
-                            <a href="https://wa.me/62895329199049" target="_blank" class="flex items-center gap-4 text-slate-300 hover:text-emerald-400 transition-colors p-3 rounded-xl bg-slate-900/60 border border-slate-700/50">
-                                <div class="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400"><i class="fa-brands fa-whatsapp"></i></div>
-                                <div>
-                                    <div class="text-xs text-slate-400">WhatsApp / Phone</div>
-                                    <div class="font-medium">+62 895-3291-99049</div>
-                                </div>
-                            </a>
-
-                            <a href="https://www.linkedin.com/in/fajri-assidiq/" target="_blank" class="flex items-center gap-4 text-slate-300 hover:text-blue-400 transition-colors p-3 rounded-xl bg-slate-900/60 border border-slate-700/50">
-                                <div class="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400"><i class="fa-brands fa-linkedin"></i></div>
-                                <div>
-                                    <div class="text-xs text-slate-400">LinkedIn Profile</div>
-                                    <div class="font-medium">linkedin.com/in/fajri-assidiq</div>
-                                </div>
-                            </a>
+                    <!-- Email -->
+                    <a href="mailto:fajriassidiq7@gmail.com" class="flex items-center justify-center sm:justify-start gap-4 text-slate-300 hover:text-cyan-400 transition-colors p-4 rounded-2xl bg-slate-900/60 border border-slate-700/50 max-w-xl mx-auto text-left">
+                        <div class="w-11 h-11 shrink-0 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-400"><i class="fa-solid fa-envelope"></i></div>
+                        <div class="min-w-0">
+                            <div class="text-xs text-slate-400">Email Direct</div>
+                            <div class="font-medium break-all">fajriassidiq7@gmail.com</div>
                         </div>
+                    </a>
+
+                    <!-- Tombol WhatsApp & LinkedIn -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl mx-auto">
+                        <a href="https://wa.me/62895329199049" target="_blank" rel="noopener" class="btn-shine btn-wa py-4 px-6 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-3">
+                            <i class="fa-brands fa-whatsapp text-2xl"></i> WhatsApp
+                        </a>
+                        <a href="https://www.linkedin.com/in/fajri-assidiq/" target="_blank" rel="noopener" class="btn-shine btn-li py-4 px-6 rounded-2xl bg-gradient-to-r from-blue-500 to-blue-700 text-white font-bold shadow-lg shadow-blue-500/20 flex items-center justify-center gap-3">
+                            <i class="fa-brands fa-linkedin text-2xl"></i> LinkedIn
+                        </a>
                     </div>
 
-                    <!-- Quick Message Box -->
-                    <div class="bg-slate-900/80 p-6 rounded-2xl border border-slate-700">
-                        <h3 class="text-lg font-bold text-white mb-4">Send Quick Message</h3>
-                        <form id="contact-form" class="space-y-4">
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-400 mb-1">Your Name</label>
-                                <input type="text" id="sender-name" required placeholder="Enter your name" class="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-cyan-400">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-400 mb-1">Message / Offer</label>
-                                <textarea id="sender-message" rows="3" required placeholder="Write a brief message..." class="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-cyan-400"></textarea>
-                            </div>
-                            <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold hover:opacity-90 transition-opacity text-sm flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-paper-plane"></i> Send via Mailto
-                            </button>
-                        </form>
-                    </div>
                 </div>
             </div>
 
@@ -725,15 +935,46 @@
             });
         });
 
-        // Contact form mailto generator
-        document.getElementById('contact-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const name = document.getElementById('sender-name').value;
-            const message = document.getElementById('sender-message').value;
-            
-            const mailtoUrl = `mailto:fajriassidiq7@gmail.com?subject=Portfolio Message from ${encodeURIComponent(name)}&body=${encodeURIComponent(message)}`;
-            window.location.href = mailtoUrl;
-        });
+        // Header shadow saat scroll
+        const hdr = document.querySelector('header');
+        const onScroll = () => hdr.classList.toggle('scrolled', window.scrollY > 10);
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+
+        // Efek muncul saat di-scroll
+        (function () {
+            if (!('IntersectionObserver' in window)) return;
+            const targets = document.querySelectorAll('.section-head, .g-about > *, .g-exp > *, .g-proj > *, .g-skills > *, .g-cert > *, .g-contact > *');
+            targets.forEach(el => {
+                el.classList.add('reveal');
+                const idx = Array.prototype.indexOf.call(el.parentElement.children, el);
+                el.style.transitionDelay = (idx % 3) * 90 + 'ms';
+            });
+            const io = new IntersectionObserver((entries) => {
+                entries.forEach(e => {
+                    if (!e.isIntersecting) return;
+                    const el = e.target;
+                    el.classList.add('is-visible');
+                    io.unobserve(el);
+                    // Lepas class reveal setelah selesai agar efek hover normal kembali
+                    setTimeout(() => { el.classList.remove('reveal', 'is-visible'); el.style.transitionDelay = ''; }, 1200);
+                });
+            }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+            targets.forEach(el => io.observe(el));
+            window.addEventListener('beforeprint', () => targets.forEach(el => el.classList.add('is-visible')));
+        })();
+
+        // Animasi grafik bahasa saat terlihat
+        (function () {
+            const bars = document.querySelectorAll('.lang-bar');
+            const chart = document.getElementById('lang-chart');
+            const fill = () => bars.forEach((b, i) => setTimeout(() => b.classList.add('is-in'), i * 150));
+            if (!('IntersectionObserver' in window)) { fill(); return; }
+            const io = new IntersectionObserver((entries) => {
+                if (entries.some(e => e.isIntersecting)) { fill(); io.disconnect(); }
+            }, { threshold: 0.3 });
+            io.observe(chart);
+        })();
     </script>
 </body>
 </html>
